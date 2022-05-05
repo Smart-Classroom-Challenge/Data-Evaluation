@@ -42,3 +42,10 @@ FROM smartclassroom_dev.public.api_measurement m
          INNER JOIN smartclassroom_dev.public.api_measurementstation ms ON m.fk_measurement_station_id = ms.id
 WHERE time > NOW() - INTERVAL '14 days'
 GROUP BY ms.name;
+
+-- time ordering - should make a big difference between base postgres and TimescaleDB
+SELECT date_trunc('minute', time) AS minute, max(temperature)
+FROM smartclassroom_dev.public.api_measurement
+WHERE time > NOW() - INTERVAL '14 days' AND fk_measurement_station_id = 1
+GROUP BY minute
+ORDER BY minute ASC;
