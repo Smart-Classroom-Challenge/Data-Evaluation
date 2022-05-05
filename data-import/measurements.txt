@@ -1,0 +1,10 @@
+{"time": "2022-05-05 10:55:46.647474+02:00", "co2": "1121", "temperature": "24.27", "humidity": "49.15", "motion": "False", "light": "40304"}
+{"time": "2022-05-05 10:55:51.742967+02:00", "co2": "1119", "temperature": "24.27", "humidity": "49.16", "motion": "False", "light": "40384"}
+{"time": "2022-05-05 10:55:56.849051+02:00", "co2": "1119", "temperature": "24.26", "humidity": "49.12", "motion": "False", "light": "40304"}
+{"time": "2022-05-05 10:56:02.043757+02:00", "co2": "1120", "temperature": "24.26", "humidity": "49.13", "motion": "False", "light": "40352"}
+{"time": "2022-05-05 10:56:07.025590+02:00", "co2": "1120", "temperature": "24.26", "humidity": "49.11", "motion": "False", "light": "40336"}
+{"time": "2022-05-05 10:56:12.227073+02:00", "co2": "1120", "temperature": "24.29", "humidity": "49.17", "motion": "False", "light": "40368"}
+{"time": "2022-05-05 10:56:17.346294+02:00", "co2": "1120", "temperature": "24.26", "humidity": "49.17", "motion": "False", "light": "40336"}
+{"time": "2022-05-05 10:56:22.286274+02:00", "co2": "1120", "temperature": "24.26", "humidity": "49.19", "motion": "False", "light": "40352"}
+{"time": "2022-05-05 10:56:27.620598+02:00", "co2": "1121", "temperature": "24.27", "humidity": "49.15", "motion": "False", "light": "40272"}
+{"time": "2022-05-05 10:56:32.588686+02:00", "co2": "1121", "temperature": "24.29", "humidity": "49.24", "motion": "False", "light": "40368"}
