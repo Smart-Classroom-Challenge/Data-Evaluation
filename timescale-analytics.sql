@@ -34,10 +34,10 @@ GROUP BY five_min
 ORDER BY five_min DESC
 LIMIT 100;
 
--- histogram - get temperature values in 10 bins between 15° C and 30° C, which makes a bin range of 1.5°
+-- histogram - get temperature values in 8 bins between 15°C and 35°C, which makes a bin range of 2.5°C
 SELECT ms.name,
        COUNT(*),
-       histogram(m.temperature, 15.0, 30.0, 10)
+       histogram(m.temperature, 15.0, 35.0, 8)
 FROM smartclassroom_dev.public.api_measurement m
          INNER JOIN smartclassroom_dev.public.api_measurementstation ms ON m.fk_measurement_station_id = ms.id
 WHERE time > NOW() - INTERVAL '14 days'
