@@ -1,4 +1,7 @@
--- overview: https://docs.timescale.com/timescaledb/latest/how-to-guides/query-data/advanced-analytic-queries/#histogram
+-- overview:
+-- https://docs.timescale.com/timescaledb/latest/how-to-guides/query-data/advanced-analytic-queries/#histogram
+-- performance difference:
+-- https://www.timescale.com/blog/timescaledb-vs-6a696248104e/
 
 -- get median temperature for a measurement station
 SELECT percentile_cont(0.5)
@@ -27,7 +30,7 @@ WHERE diff IS NULL
    OR diff != 0;
 
 -- get average temperature over a time buckets of 5 minutes
-SELECT time_bucket('5 minutes', time) AS five_min, round(avg(temperature), 2)
+SELECT time_bucket('1 day', time) AS five_min, round(max(temperature), 2)
 FROM smartclassroom_dev.public.api_measurement
 WHERE fk_measurement_station_id = 1
 GROUP BY five_min
@@ -43,7 +46,7 @@ FROM smartclassroom_dev.public.api_measurement m
 WHERE time > NOW() - INTERVAL '14 days'
 GROUP BY ms.name;
 
--- time ordering - should make a big difference between base postgres and TimescaleDB
+-- time ordering - should make a big difference between base Postgres and TimescaleDB
 SELECT date_trunc('minute', time) AS minute, max(temperature)
 FROM smartclassroom_dev.public.api_measurement
 WHERE time > NOW() - INTERVAL '14 days' AND fk_measurement_station_id = 1
