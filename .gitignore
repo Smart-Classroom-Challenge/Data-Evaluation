@@ -128,3 +128,5 @@ dmypy.json
 .pyre/
 
 *.ini
+.idea/
+.DS_Store
