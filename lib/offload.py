@@ -10,7 +10,7 @@ class Offload:
     meteofile = "data/2022_05_17_meteoswiss.txt"
 
     def __init__(self):
-        plt.rcParams['timezone'] = "CET"
+        pass
 
     def __read_config(self, filename = 'config.ini'):
         config = configparser.ConfigParser()
@@ -116,13 +116,13 @@ class Offload:
         meteo = pd.read_csv(self.meteofile, delimiter = ';')
         meteo.columns = ["Station",
                     "Time", 
-                    "Lufttemperatur 2 m über Boden; Momentanwert in °C", 
-                    "Niederschlag; gleitende Stundensumme (über 6 Zehnminutenintervalle) in mm", 
-                    "Relative Luftfeuchtigkeit 2 m über Boden; Momentanwert in %",
+                    "Lufttemperatur 2 m über Boden; Momentanwert in °C", 
+                    "Niederschlag; gleitende Stundensumme (über 6 Zehnminutenintervalle) in mm", 
+                    "Relative Luftfeuchtigkeit 2 m über Boden; Momentanwert in %",
                     "Windgeschwindigkeit; Zehnminutenmittel in %"]
 
         meteo["Time"] = pd.to_datetime(meteo["Time"], format = "%Y%m%d%H%M")
-        meteo["Time"] = meteo["Time"] + pd.Timedelta(hours = 2)
+        meteo["Time"] = meteo["Time"].dt.tz_localize("CET")
         meteo = meteo.set_index("Time")
 
         if startDate != None:
