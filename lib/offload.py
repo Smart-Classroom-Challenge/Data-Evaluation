@@ -39,7 +39,8 @@ class Offload:
             select * from api_classroom
             inner join api_measurementstation on api_classroom.id = api_measurementstation.fk_classroom_id
             inner join api_measurement on api_measurementstation.id = api_measurement.fk_measurement_station_id
-            where api_classroom.name = '{name}' and time BETWEEN '{startDate}' AND '{endDate}';
+            where api_classroom.name = '{name}' and time BETWEEN '{startDate}' AND '{endDate}'
+            order by time;
         """    
         result = pd.read_sql_query(sql_stations, con)
         
@@ -79,6 +80,7 @@ class Offload:
         start_date = datetime(2022, 4, 25)
         dfs = []
 
+        lesson_uuid = 0
         for week in range(3):
             for lektion in stundenplan:
                 date = start_date + timedelta(days=7*week + lektion[0])
@@ -86,8 +88,10 @@ class Offload:
                 end_time   = date.replace(hour=lektion[2][0], minute=lektion[2][1])
                 df = self.get_measurement(name, start_time, end_time)
                 if not df.empty:
+                    df['lesson_uuid'] = lesson_uuid
                     df['People'] = lektion[3]
                     dfs.append(df)
+                    lesson_uuid += 1
 
         return pd.concat(dfs)
 
