@@ -1,9 +1,10 @@
+import pytz
 import psycopg2
 import configparser
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import create_engine
 
 class Offload:
@@ -92,25 +93,25 @@ class Offload:
 
         return pd.concat(dfs)
 
-    def get_timebuckets_with_diff(self, name, parameter="co2", bucket_minutes=5):
+    def get_timebuckets_with_diff(self, name, start_time, end_time, parameter="co2", bucket_minutes=5):
         con = self.__get_connection()
         
+        # removed CET conversion in SQL -> no effect?
         sql_timebuckets = f"""
-            SET timezone = 'CET'; 
             SELECT ts,
-                mean,
-                median,
-                mean - LAG(mean) OVER (ORDER BY ts)     AS mean_diff,
-                median - LAG(median) OVER (ORDER BY ts) AS median_diff
+                {parameter}_mean,
+                {parameter}_mean - LAG({parameter}_mean) OVER (ORDER BY ts)     AS {parameter}_mean_diff,
+                {parameter}_median,
+                {parameter}_median - LAG({parameter}_median) OVER (ORDER BY ts) AS {parameter}_median_diff
             FROM (
                     SELECT time_bucket('{bucket_minutes} minutes', time)             AS ts,
-                            round(avg({parameter}), 2)                               AS mean,
-                            percentile_cont(0.5) WITHIN GROUP (ORDER BY {parameter}) AS median
+                            round(avg({parameter}), 2)                               AS {parameter}_mean,
+                            percentile_cont(0.5) WITHIN GROUP (ORDER BY {parameter}) AS {parameter}_median
                     FROM api_measurement
                             INNER JOIN api_measurementstation
                                         ON api_measurementstation.id = api_measurement.fk_measurement_station_id
                             INNER JOIN api_classroom ON api_classroom.id = api_measurementstation.fk_classroom_id
-                    WHERE api_classroom.name = '{name}'
+                    WHERE api_classroom.name = '{name}' and time BETWEEN '{start_time}' AND '{end_time}'
                     GROUP BY ts
                     ORDER BY ts
                 ) buckets;
@@ -119,10 +120,33 @@ class Offload:
         result = pd.read_sql_query(sql_timebuckets, con)
 
         if not result.empty:
-            result["ts"] = result["ts"].dt.tz_convert("CET")
+            result["ts"] = result["ts"].dt.tz_convert("CET") # returned from DB as UTC -> convert to CET
 
         con.close()
         return result
+
+    def get_timebuckets_for_timetable(self, name, stundenplan):
+        """
+        stundenplan: ist eine Liste mit einem dict zu jeder lektion, darin ist der start, ende und die personenanzahl enthalten.
+        """
+        start_date = datetime(2022, 4, 25)
+        dfs = []
+
+        lesson_uuid = 0
+        for week in range(3):
+            for lektion in stundenplan:
+                date = start_date + timedelta(days=7*week + lektion[0])
+                tz = pytz.timezone('Europe/Zurich') # timezone aware dates for query
+                start_time = tz.localize(date.replace(hour=lektion[1][0], minute=lektion[1][1]))
+                end_time = tz.localize(date.replace(hour=lektion[2][0], minute=lektion[2][1]))
+                df = self.get_timebuckets_with_diff(name, start_time, end_time)
+                if not df.empty:
+                    df['lesson_uuid'] = lesson_uuid
+                    df['people'] = lektion[3]
+                    dfs.append(df)
+                    lesson_uuid += 1
+
+        return pd.concat(dfs)
 
     def get_entrance(self, name, startDate, endDate):
         con = self.__get_connection()
