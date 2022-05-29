@@ -95,6 +95,38 @@ class Offload:
 
         return pd.concat(dfs)
 
+    def get_timebuckets_with_diff(self, name, parameter="co2", bucket_minutes=5):
+        con = self.__get_connection()
+        
+        sql_timebuckets = f"""
+            SET timezone = 'CET';
+            SELECT ts,
+                mean,
+                median,
+                mean - LAG(mean) OVER (ORDER BY ts)     AS mean_diff,
+                median - LAG(median) OVER (ORDER BY ts) AS median_diff
+            FROM (
+                    SELECT time_bucket('{bucket_minutes} minutes', time)             AS ts,
+                            round(avg({parameter}), 2)                               AS mean,
+                            percentile_cont(0.5) WITHIN GROUP (ORDER BY {parameter}) AS median
+                    FROM api_measurement
+                            INNER JOIN api_measurementstation
+                                        ON api_measurementstation.id = api_measurement.fk_measurement_station_id
+                            INNER JOIN api_classroom ON api_classroom.id = api_measurementstation.fk_classroom_id
+                    WHERE api_classroom.name = '{name}'
+                    GROUP BY ts
+                    ORDER BY ts
+                ) buckets;
+        """
+
+        result = pd.read_sql_query(self, sql_timebuckets, con)
+
+        if not result.empty:
+            result["ts"] = result["ts"].dt.tz_convert("CET")
+
+        con.close()
+        return result
+
     def get_entrance(self, name, startDate, endDate):
         con = self.__get_connection()
 
