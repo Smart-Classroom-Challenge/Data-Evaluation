@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from datetime import datetime, timedelta
+from sqlalchemy import create_engine
 
 class Offload:
     plt.rcParams['timezone'] = "CET"
@@ -25,11 +26,7 @@ class Offload:
 
     def __get_connection(self):
         db_hostname, db_database, db_username, db_password = self.__read_config()
-        return  psycopg2.connect(
-            host     = db_hostname,
-            database = db_database,
-            user     = db_username,
-            password = db_password)
+        return create_engine(f'postgresql+psycopg2://{db_username}:{db_password}@{db_hostname}/{db_database}').connect()
 
     def get_measurement(self, name, startDate, endDate):
         con = self.__get_connection()
@@ -99,7 +96,7 @@ class Offload:
         con = self.__get_connection()
         
         sql_timebuckets = f"""
-            SET timezone = 'CET';
+            SET timezone = 'CET'; 
             SELECT ts,
                 mean,
                 median,
@@ -123,6 +120,7 @@ class Offload:
 
         if not result.empty:
             result["ts"] = result["ts"].dt.tz_convert("CET")
+            pass
 
         con.close()
         return result
