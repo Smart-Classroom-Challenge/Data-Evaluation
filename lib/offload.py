@@ -116,11 +116,10 @@ class Offload:
                 ) buckets;
         """
 
-        result = pd.read_sql_query(self, sql_timebuckets, con)
+        result = pd.read_sql_query(sql_timebuckets, con)
 
         if not result.empty:
             result["ts"] = result["ts"].dt.tz_convert("CET")
-            pass
 
         con.close()
         return result
